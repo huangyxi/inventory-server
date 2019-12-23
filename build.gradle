@@ -1,0 +1,32 @@
+plugins {
+	id 'java'
+	id 'application'
+	id 'java-library-distribution'
+}
+
+repositories {
+	//mavenCentral()
+	maven {
+		url 'https://maven.aliyun.com/nexus/content/groups/public/'
+	}
+}
+
+application {
+	mainClassName = 'server.Main'
+}
+
+jar {
+	manifest {
+		attributes 'Main-Class': 'server.Main'
+	}
+}
+
+task copyToLib(type: Copy) {
+	from configurations.runtime
+	into "lib/"
+}
+
+dependencies {
+	implementation 'com.google.code.gson:gson:2.8.6'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.+'
+}
