@@ -35,14 +35,15 @@ public class Server {
 		new Writer().start();
 		try {
 			while (true) {
+				Log.info("Listening...");
 				Socket socket = server.accept();
 				Log.info(++id + ": Connected:" + socket.getInetAddress() + ":" + socket.getPort());
 				ServerThread thread = new ServerThread(id, socket);
 				socketList.put(id, thread);
-				thread.run();
+				thread.start();
 			}
 		} catch (IOException e) {
-			Log.error(e.getMessage());
+			Log.error(e);
 		}
 	}
 
@@ -80,7 +81,7 @@ public class Server {
 		}
 	}
 
-	private class ServerThread implements Runnable {
+	private class ServerThread extends Thread implements Runnable {
 		private int id;
 		private Socket socket;
 		private InputStream in;
@@ -121,18 +122,16 @@ public class Server {
 				if (r == OperateType.ALL_RIGHT) {
 					send("Login successful!");
 				} else {
+					// Log.info(id + ": " + r.toString());
 					send(r.toString() + " (" + r.toInt() + ")");
-					close();
 					return;
 				}
 				while (!socket.isClosed() && line != null && !EXIT.equals(line)) {
 					line = reader.readLine();
 					if (line != null) {
-						Log.info(id + ": " + line);
-						send(p.parse(line));
+						send(p.parse(line).replaceAll("\\\\", "\\\\\\\\").replaceAll("\n", "\\\\n"));
 					}
 				}
-				close();
 				Log.info(id + ": disconnected normally by itself");
 			} catch (IOException e) {
 				Log.warning(id + ": disconnected abnormally");
@@ -172,9 +171,10 @@ public class Server {
 				if (socket != null) {
 					socket.close();
 				}
+				Log.info(id + ": removed");
 				socketList.remove(id);
 			} catch (IOException e) {
-				Log.error(e.getMessage());
+				Log.error(e);
 			}
 		}
 	}

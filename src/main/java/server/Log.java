@@ -89,10 +89,21 @@ class Log {
 	}
 
 	private static <T extends Exception> String getCallName(T e) {
-		final StackTraceElement s = e.getStackTrace()[0];
-		final String className = s.getClassName();
-		final String methodName = s.getMethodName();
-		final int lineNumber = s.getLineNumber();
-		return "@" + className + "::" + methodName + "[" + lineNumber + "]";
+		final int logTrace = 4;
+		final String currentMethodName = Thread.currentThread().getStackTrace()[logTrace].getClassName() + "::"
+				+ Thread.currentThread().getStackTrace()[logTrace].getMethodName();
+		// System.out.println(currentMethodName);
+		final StackTraceElement[] arrE = e.getStackTrace();
+		int call;
+		for (call = 0; call < e.getStackTrace().length; call++) {
+			// System.out.println(arrE[call].getMethodName());
+			if (currentMethodName.equals(arrE[call].getClassName() + "::" + arrE[call].getMethodName())) {
+				break;
+			}
+		}
+		final String className = arrE[call].getClassName();
+		final String methodName = arrE[call].getMethodName();
+		final int lineNumber = arrE[call].getLineNumber();
+		return "(" + call + ")@" + className + "::" + methodName + "[" + lineNumber + "]";
 	}
 }

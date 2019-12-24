@@ -5,7 +5,7 @@ import java.security.SecureRandom;
 /**
  * SPassword
  */
-class SPassword {
+class KeyGen {
 	private static final String RANDOM_LOWER = "abcdefghijklmnopqrstuvwxyz";
 	private static final String RANDOM_UPPER = RANDOM_LOWER.toUpperCase();
 	private static final String RANDOM_NUMBER = "0123456789";
@@ -29,7 +29,9 @@ class SPassword {
 	}
 
 	public boolean isSame(String password, String encoded) {
-		return encoded.equals(PasswordEncode.encode(password, key));
+		var rightEncoded = Secure.encode(password, key);
+		Log.info("Right encoded: " + rightEncoded);
+		return encoded.equals(rightEncoded);
 	}
 
 	private String generateKey() {

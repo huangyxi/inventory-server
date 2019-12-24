@@ -44,7 +44,6 @@ final class InventoryAccess extends DataAccess {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		Log.info(s);
 		return s;
 	}
 
@@ -91,13 +90,13 @@ final class InventoryAccess extends DataAccess {
 			int row;
 			String sql;
 			if (Tools.isPureNumber(idName)) {
-				sql = String.format("DELETEs FROM %s WHERE %s = ?", getTable(), ID);
+				sql = String.format("DELETE FROM %s WHERE %s = ?", getTable(), ID);
 				row = update(sql, Integer.parseInt(idName));
 				if (row == 0) {
 					return OperateType.ID_NOT_FOUND.toString();
 				}
 			} else {
-				sql = String.format("DELETEs FROM %s WHERE %s = ?", getTable(), NAME);
+				sql = String.format("DELETE FROM %s WHERE %s = ?", getTable(), NAME);
 				row = update(sql, idName);
 				if (row == 0) {
 					return OperateType.NAME_NOT_FOUND.toString();
@@ -153,7 +152,12 @@ final class InventoryAccess extends DataAccess {
 		}
 		String sql;
 		int row;
-		var num = Long.valueOf(snum);
+		Long num = null;
+		try {
+			num = Long.valueOf(snum);
+		} catch (NumberFormatException e) {
+			return OperateType.ARGUMENT_TYPE_WRONG.toString();
+		}
 		try {
 			if (Tools.isPureNumber(idName)) {
 				sql = String.format("UPDATE %s SET %s = %s - ? WHERE %s = ?", getTable(), STORAGE, STORAGE, ID);
@@ -163,7 +167,7 @@ final class InventoryAccess extends DataAccess {
 				}
 			} else {
 				sql = String.format("UPDATE %s SET %s = %s - ? WHERE %s = ?", getTable(), STORAGE, STORAGE, NAME);
-				row = update(sql, num, NAME);
+				row = update(sql, num, idName);
 				if (0 == row) {
 					return OperateType.NAME_NOT_FOUND.toString() + "or " + OperateType.STORAGE_EMPTY.toString();
 				}
@@ -192,6 +196,68 @@ final class InventoryAccess extends DataAccess {
 		}
 		Log.info(s);
 		return s;
+	}
+
+	public String touch(String name, String sPrice, String sNum) {
+		String sql;
+		int row;
+		var price = new BigDecimal(sPrice);
+		Long num = null;
+		try {
+			num = Long.valueOf(sNum);
+		} catch (NumberFormatException e) {
+			return OperateType.ARGUMENT_TYPE_WRONG.toString();
+		}
+		try {
+			sql = String.format("INSERT IGNORE INTO %s (%s, %s, %s) VALUES (?,?,?);", getTable(), NAME, PRICE, STORAGE);
+			row = update(sql, name, price, num);
+			if (0 == row) {
+				return OperateType.ID_DUPLICATE.toString();
+			}
+			return OperateType.ALL_RIGHT.toString();
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		return OperateType.OTHER_ERROR.toString();
+	}
+
+	public String touch(String sId, String name, String sPrice, String sNum) {
+		Integer id = null;
+		if (Tools.isPureNumber(sId)) {
+			id = Integer.parseInt(sId);
+		} else {
+			return OperateType.ARGUMENT_TYPE_WRONG.toString();
+		}
+		String sql;
+		var ra = queryNull();
+		try {
+			sql = String.format("SELECT %s FROM %s WHERE %s = ?;", ID, getTable(), ID);
+			ra = query(sql, 1, id);
+			if (0 != ra.size()) {
+				return OperateType.ID_DUPLICATE.toString();
+			}
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		int row;
+		var price = new BigDecimal(sPrice);
+		Long num = null;
+		try {
+			num = Long.valueOf(sNum);
+		} catch (NumberFormatException e) {
+			return OperateType.ARGUMENT_TYPE_WRONG.toString();
+		}
+		try {
+			sql = String.format("INSERT IGNORE INTO %s (%s, %s, %s, %s) VALUES (?,?,?,?);", getTable(), ID, NAME, PRICE, STORAGE);
+			row = update(sql, id, name, price, num);
+			if (0 == row) {
+				return OperateType.ID_DUPLICATE.toString();
+			}
+			return OperateType.ALL_RIGHT.toString();
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		return OperateType.OTHER_ERROR.toString();
 	}
 
 	private String oneResult(ArrayList<Object> result) {
