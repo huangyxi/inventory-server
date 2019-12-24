@@ -39,9 +39,11 @@ abstract class DataAccess {
 		int rows = -1;
 		try {
 			ps = conn.prepareStatement(sql);
+			Log.info(ColorTB.uline() + ColorTB.whiteT() + sql + ColorTB.reset());
 			for (int i = 0; i < args.size(); i++) {
 				ps.setObject(i + 1, args.get(i));
 			}
+			Log.info(ColorTB.uline() + ColorTB.whiteT() + ps.toString() + ColorTB.reset());
 			rows = ps.executeUpdate();
 		} catch (final SQLException se) {
 			Log.error(se.getMessage());
@@ -67,11 +69,11 @@ abstract class DataAccess {
 		ResultSet rset = null;
 		try {
 			ps = conn.prepareStatement(sql);
-			Log.info(sql);
+			Log.info(ColorTB.uline() + ColorTB.whiteT() + sql + ColorTB.reset());
 			for (int i = 0; i < args.size(); i++) {
 				ps.setObject(i + 1, args.get(i));
 			}
-			Log.info(ps.toString());
+			Log.info(ColorTB.uline() + ColorTB.whiteT() + ps.toString() + ColorTB.reset());
 			rset = ps.executeQuery();
 			while (rset.next()) {
 				var thisRow = new ArrayList<Object>();

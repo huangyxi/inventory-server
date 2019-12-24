@@ -77,7 +77,7 @@ final class InventoryAccess extends DataAccess {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		Log.info(s);
+		// Log.info(s);
 		return s;
 	}
 
@@ -126,7 +126,7 @@ final class InventoryAccess extends DataAccess {
 				sql = String.format("SELECT %s FROM %s WHERE %s = ?", ID, getTable(), NAME);
 				ra = query(sql, 1, idName);
 				if (0 == ra.size()) {
-					OperateType.NAME_NOT_FOUND.toString();
+					return OperateType.NAME_NOT_FOUND.toString();
 				}
 			}
 			id = (Long) ra.get(0).get(0);
@@ -194,16 +194,17 @@ final class InventoryAccess extends DataAccess {
 		} catch (Exception e) {
 			Log.error(e);
 		}
-		Log.info(s);
+		// Log.info(s);
 		return s;
 	}
 
 	public String touch(String name, String sPrice, String sNum) {
 		String sql;
 		int row;
-		var price = new BigDecimal(sPrice);
+		BigDecimal price = null;
 		Long num = null;
 		try {
+			price = new BigDecimal(sPrice);
 			num = Long.valueOf(sNum);
 		} catch (NumberFormatException e) {
 			return OperateType.ARGUMENT_TYPE_WRONG.toString();
@@ -240,9 +241,10 @@ final class InventoryAccess extends DataAccess {
 			Log.error(e);
 		}
 		int row;
-		var price = new BigDecimal(sPrice);
+		BigDecimal price = null;
 		Long num = null;
 		try {
+			price = new BigDecimal(sPrice);
 			num = Long.valueOf(sNum);
 		} catch (NumberFormatException e) {
 			return OperateType.ARGUMENT_TYPE_WRONG.toString();
